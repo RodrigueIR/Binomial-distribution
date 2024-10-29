@@ -9,7 +9,3 @@ The parameters are:
 - Only two possible outcomes; success or failure
 - Probability of a success P(S) is the same for each trial
 - The random variable x counts the number of successful trials 
-### Procedures with simulations
-Simulate  random values that give a binomial Distribution. 
-This represents 10 trials, 30 times, recording only successes.
-The output is a count how often each number of successes occurred.
