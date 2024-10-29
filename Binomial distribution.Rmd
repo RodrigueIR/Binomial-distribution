@@ -1,0 +1,175 @@
+---
+title: "Binomial Distribution"
+author: "Rodrigue Irampa"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Simulate  random values that give a binomial Distribution. 
+This represents 10 trials, 30 times, recording only successes.
+The output is a count how often each number of successes occurred.
+
+*Result Interpretation*
+Using a binomial distribution with the parameters p=0.5 (probability of success) and N=10 (number of trials), this code creates a random sample of size 30. The frequency of each number of successes in the sample is then printed.
+
+```{r}
+sample_size = 30
+p = 0.5
+N = 10
+dat_1 = rbinom(sample_size, prob = p, size = N)
+print("The count how often each number of successes occurred is ")
+table(dat_1)
+```
+## visualization 
+we have to transform it to a factor to use 
+*Result interpretation*
+This code produces a bar plot that displays the frequency of each success count after converting dat_1 into a factor with levels 0 to 10. The frequency of each count is displayed on the y-axis, while the x-axis displays the total number of successes.
+ 
+```{r}
+dat1_fac <- factor(dat_1, levels = 0:N)
+par(las = 1, cex.lab = 1.2)
+barplot(table(dat1_fac), xlab = "No. of successes", ylab = "Frequency")
+ 
+```
+
+## constructing the Binomial Distribution 
+
+The function dbinom() provides the probability for x successes given the parameters p and N which must add to 1.
+Eg,  When you toss ten coins you know that there will be between zero and ten heads, i.e. the probability of a result between zero and ten equals one.
+*Result interpretation: *
+For p=0.5 and N=10, the code computes the Binomial likelihood Mass Function (PMF). It then depicts the PMF as a red step function that displays the likelihood of each success count from 0 to 10.
+
+```{r}
+p <- 0.5
+N <- 10
+binom1 <- dbinom(x = 0:10, prob = p, size = N)
+sum(binom1)
+
+par(las = 1, cex.lab = 1.2)
+plot(x = 0:10, y = binom1, type = "h", col = "red", xlab = "No. of successes",
+     ylab = "Probability")
+points(x = 0:10, y = binom1, col = "red", pch = 19)
+
+```
+
+##. varying probabilities of success 
+
+when its at 0.2, its positively skewed, at 0.9 its negatively skewed, at 0.5 its normally distributed. 
+i.e varying P afftects the skewness 
+```{r}
+N <- 10
+p_vec <- c(0.2, 0.5, 0.9)
+
+x <- 0:N
+par(las = 1, cex.lab = 1.2)
+plot(x, y = dbinom(x, prob = p_vec[1], size = N), type = "n",
+     xlab = "No. of successes", ylab = "Probability", ylim = c(0, 0.5))
+for (i in 1:length(p_vec)){
+   points(x, y = dbinom(x, prob = p_vec[i], size = N), col = i, type = "b",
+          pch = 19, lty = 2)
+}
+legend("top", legend = p_vec, col = 1:3, pch = 19, title = "p")
+```
+
+
+## Varying N
+
+varying N affects the kurtosis 
+
+```{r}
+N_vec <- c(5, 10, 20)
+p <- 0.5
+
+x <- 0:20
+par(las = 1, cex.lab = 1.2)
+plot(x, y = dbinom(x, prob = p, size = N_vec[1]), type = "n",
+     xlab = "No. of successes", ylab = "Probability")
+for (i in 1:length(N_vec)){
+   points(x, y = dbinom(x, prob = p, size = N_vec[i]), col = i, type = "b",
+          pch = 19, lty = 2)
+}
+legend("topright", legend = N_vec, col = 1:3, pch = 19, title = "N")
+```
+## Defining the log-likelihood function 
+
+To be able to calculate the likelihood for any parameter values, we define a function for the log-likelihood with the parameters and the data as arguments.
+
+
+```{r}
+log_likelihood <- function(par_p, par_N, data)
+{
+   LL <- sum(dbinom(x = data, prob = par_p, size = par_N, log = T))
+   return(LL)
+}
+
+log_likelihood(par_p = 0.5, par_N = 10, data = dat_1)
+```
+
+## Maximum Likelihood Estimation
+This means we would like to find the parameter, that most likely generated the data.
+Let us first visualize the data with models of different parameter values.
+
+For this purpose the observed frequencies in the data are converted to proportions by dividing by the sample size.
+
+This is to help standardize frequencies to the same scale as probabilities. 
+
+Note; frequencies sum up to the sample size (because we divided my the sample size)
+    ; and proportions sum up to 1
+
+```{r}
+par(las = 1, cex.lab = 1.2)
+prop_dat <- table(dat1_fac)/sample_size
+xbars <- barplot(prop_dat, xlab = "No. of successes",
+                 ylab = "Proportion", ylim = c(0, 0.4))
+
+p_vec <- seq(0.2, 0.8, by = 0.1)
+col_vec <- rainbow(length(p_vec))
+N <- 10
+x <- 0:10
+for (i in 1:length(p_vec))
+   points(xbars, dbinom(x, prob = p_vec[i], size = N), type = "b", col = col_vec[i], lty = 2,
+          pch = 19)
+```
+
+To derive the maximum likelihood estimate of p, we evaluate the likelihood function for a sequence of parameter values using a small step size.
+note; the maximum of the log-likelihood is identical to the maximum of the likelihood
+*Result interpretation: *
+This code uses the binomial distribution with N = 10 trials, data from dat_1, and a step size of 0.01 to compute the log-likelihood for various values of p ranging from 0 to 1. The log-likelihood is then plotted versus p, and a red point and line are used to indicate the p value that maximizes the log-likelihood (MLE).
+
+```{r}
+p_vec <- seq(0, 1, by = 0.01)
+logLik <- sapply(p_vec, FUN = log_likelihood, par_N = 10, data = dat_1)
+
+par(las = 1, cex.lab = 1.2)
+plot(p_vec, logLik, type = "l", xlab = "p", ylab = "log-Likelihood")
+
+imax <- which.max(logLik)
+p_MLE <- p_vec[imax]
+p_MLE
+
+points(p_MLE, max(logLik), pch = 19, col = "red")
+abline(v = p_MLE, col = "red")
+```
+
+The maximum likelihood estimate is close to the true value used for the data generation. 
+It follows that, the larger the sample size, the lower this difference will be. 
+
+## The true value 
+
+we can now estimate to the true value with increasing sample size.
+we plot the data with the theoretical underlying distribution as well as with the distribution based on the MLE estimate
+*Result interpretation: *
+The percentage of each success count in the prop_dat data is displayed in a bar plot created by this code. Next, using the previously determined MLE estimate (p_MLE) and true probability (p = 0.5), it overlays the theoretical binomial probabilities for success counts. The legend uses various colors and point styles to show the data, the true probability, and the MLE probability.
+
+```{r}
+par(las = 1, cex.lab = 1.2)
+xbars <- barplot(prop_dat, xlab = "No. of successes",
+                 ylab = "Proportion", ylim = c(0, 0.4))
+points(xbars, dbinom(x, prob = 0.5, size = 10), type = "b", col = "blue",
+       pch = 19, lty = 2)
+points(xbars, dbinom(x, prob = p_MLE, size = 10), type = "b", col = "red",
+       pch = 19, lty = 2)
+legend("topright", legend = c("Data","True p","MLE p"),
+       col = c("gray", "blue","red"), pch = c(15, 19, 19))
+
+```
