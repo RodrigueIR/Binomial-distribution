@@ -8,4 +8,6 @@ The parameters are:
 - Each trial is independent of other trials
 - Only two possible outcomes; success or failure
 - Probability of a success P(S) is the same for each trial
-- The random variable x counts the number of successful trials 
+- The random variable x counts the number of successful trials
+### Maximum likelihood Estimation
+![MLP](https://github.com/user-attachments/assets/19c2792e-e4e3-41f9-8a7f-4110e81ef522)
