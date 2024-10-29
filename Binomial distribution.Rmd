@@ -29,9 +29,8 @@ This code produces a bar plot that displays the frequency of each success count 
 dat1_fac <- factor(dat_1, levels = 0:N)
 par(las = 1, cex.lab = 1.2)
 barplot(table(dat1_fac), xlab = "No. of successes", ylab = "Frequency")
- 
 ```
-
+![histogram](https://github.com/user-attachments/assets/f7be5049-b035-4a3b-a6e2-b586e87b5640)
 ## constructing the Binomial Distribution 
 
 The function dbinom() provides the probability for x successes given the parameters p and N which must add to 1.
